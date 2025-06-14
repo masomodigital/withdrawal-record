@@ -79,6 +79,7 @@
         <th>Amount</th>
         <th>New Balance</th>
         <th>Date</th>
+        <th>Status</th> <!-- New Status column header -->
       </tr>
     </thead>
     <tbody></tbody>
@@ -141,6 +142,7 @@
           <td class="amount">KSh.${row.amount}</td>
           <td>${row.balance}</td>
           <td>${row.time}</td>
+          <td>${row.status}</td> <!-- Status cell -->
         `;
         tbody.appendChild(tr);
       });
