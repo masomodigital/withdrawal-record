@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>Withdrawals Viewer</title>
   <style>
     body {
@@ -60,35 +60,113 @@
       color: red;
       font-weight: bold;
     }
+
+    /* Login form styles */
+    #loginForm {
+      max-width: 300px;
+      margin: 50px auto;
+      padding: 20px;
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+
+    #loginForm input {
+      width: 100%;
+      padding: 10px;
+      margin: 8px 0;
+      box-sizing: border-box;
+      border-radius: 4px;
+      border: 1px solid #ccc;
+      font-size: 16px;
+    }
+
+    #loginForm button {
+      width: 100%;
+      background-color: #007bff;
+      color: white;
+      padding: 10px;
+      font-size: 16px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    #loginError {
+      color: red;
+      margin-top: 10px;
+      display: none;
+    }
+
+    /* Hide main content initially */
+    #mainContent {
+      display: none;
+    }
   </style>
 </head>
 <body>
-  <h2>Withdrawals Viewer</h2>
 
-  <label for="dateDropdown">Select Date:</label>
-  <select id="dateDropdown" onchange="loadData()">
-    <option value="">-- Select Date --</option>
-  </select>
+  <!-- Login Form -->
+  <div id="loginForm">
+    <h2>Admin Login</h2>
+    <input type="text" id="username" placeholder="Username" autocomplete="username" />
+    <input type="password" id="password" placeholder="Password" autocomplete="current-password" />
+    <button onclick="attemptLogin()">Login</button>
+    <div id="loginError">Invalid username or password.</div>
+  </div>
 
-  <table id="dataTable" style="display:none;">
-    <thead>
-      <tr>
-        <th>National ID</th>
-        <th>Name</th>
-        <th>Mpesa Number</th>
-        <th>Amount</th>
-        <th>New Balance</th>
-        <th>Date</th>
-        <th>Status</th> <!-- New Status column header -->
-      </tr>
-    </thead>
-    <tbody></tbody>
-  </table>
+  <!-- Main Content (hidden until login) -->
+  <div id="mainContent">
+    <h2>Withdrawals Viewer</h2>
+
+    <label for="dateDropdown">Select Date:</label>
+    <select id="dateDropdown" onchange="loadData()">
+      <option value="">-- Select Date --</option>
+    </select>
+
+    <table id="dataTable" style="display:none;">
+      <thead>
+        <tr>
+          <th>National ID</th>
+          <th>Name</th>
+          <th>Mpesa Number</th>
+          <th>Amount</th>
+          <th>New Balance</th>
+          <th>Date</th>
+          <th>Status</th> <!-- New Status column header -->
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
 
   <script>
     const BASE_URL = "https://script.google.com/macros/s/AKfycbxwk4hyPtaX08n6Ez1MzWClUlUKgJsgu4fqZXmNt384fIue90X_02vxrvfXuzyBUMRV/exec";
 
-    window.onload = async function () {
+    // Login credentials
+    const ADMIN_USERNAME = "MASOMO";
+    const ADMIN_PASSWORD = "ADMINDAN";
+
+    function attemptLogin() {
+      const user = document.getElementById("username").value.trim();
+      const pass = document.getElementById("password").value;
+
+      if (user === ADMIN_USERNAME && pass === ADMIN_PASSWORD) {
+        // Hide login, show main content
+        document.getElementById("loginForm").style.display = "none";
+        document.getElementById("mainContent").style.display = "block";
+
+        // Load available dates for withdrawals after login
+        loadAvailableDates();
+      } else {
+        // Show error message
+        const err = document.getElementById("loginError");
+        err.style.display = "block";
+      }
+    }
+
+    // Load available dates into dropdown
+    async function loadAvailableDates() {
       try {
         const res = await fetch(`${BASE_URL}?action=getAvailableDates`);
         const dates = await res.json();
@@ -97,10 +175,12 @@
         alert("Failed to load dates.");
         console.error(err);
       }
-    };
+    }
 
+    // Populate dropdown options
     function populateDates(dates) {
       const dropdown = document.getElementById("dateDropdown");
+      dropdown.innerHTML = '<option value="">-- Select Date --</option>'; // reset
       dates.forEach(date => {
         const option = document.createElement("option");
         option.value = date;
@@ -109,6 +189,7 @@
       });
     }
 
+    // Load data for selected date
     async function loadData() {
       const selectedDate = document.getElementById("dateDropdown").value;
       if (!selectedDate) return;
@@ -123,6 +204,7 @@
       }
     }
 
+    // Render table rows with data
     function renderTable(data) {
       const table = document.getElementById("dataTable");
       const tbody = table.querySelector("tbody");
@@ -142,7 +224,7 @@
           <td class="amount">KSh.${row.amount}</td>
           <td>${row.balance}</td>
           <td>${row.time}</td>
-          <td>${row.status}</td> <!-- Status cell -->
+          <td>${row.status}</td>
         `;
         tbody.appendChild(tr);
       });
